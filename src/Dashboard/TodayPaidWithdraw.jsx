@@ -14,7 +14,7 @@ const TodayPaidWithdraw = () => {
             // Add more data as needed
         ];
 
-        $('#withdraw-history').DataTable({
+        const table = $('#withdraw-history').DataTable({
             data: data,
             columns: [
                 { data: 'sno' },
@@ -31,12 +31,20 @@ const TodayPaidWithdraw = () => {
             buttons: [
                 'copy', 'csv', 'excel', 'pdf', 'print'
             ],
-            responsive: true
+            responsive: true,
+            destroy: true, // Add this line to destroy the previous DataTable instance
         });
 
         $('#transfer-to-paid').click(() => {
             alert('Transfer to Paid button clicked');
         });
+
+        // Cleanup function to destroy the DataTable instance on component unmount
+        return () => {
+            if (table) {
+                table.destroy();
+            }
+        };
     }, []);
 
     return (

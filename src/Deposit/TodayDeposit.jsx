@@ -6,7 +6,6 @@ const TodayDeposit = () => {
       fontFamily: 'Arial, sans-serif',
       margin: 0,
       padding: 0,
-      background: 'url("/web_eg_02.jpg") no-repeat center center fixed',
       backgroundSize: 'cover',
       backdropFilter: 'blur(10px)',
       color: '#fff',

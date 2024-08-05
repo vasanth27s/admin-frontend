@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import './Dashboard.css';
 import fctcLogo from './fctc.png'; // Adjust the path according to your file structure
 
-
 const Dashboard = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
 
@@ -15,14 +14,13 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <div className="sidebar">
         <div className="logo-container">
-        <img src={fctcLogo} alt="Fctctoken Logo" className="logo-image" />
-        <div className="logo-text">
-            <i className="fas fa-bullseye"></i>
-            FCTCTOKEN
+          <img src={fctcLogo} alt="Fctctoken Logo" className="logo-image" />
+          <div className="logo-text">
+            <i className="fas fa-bullseye"></i> FCTCTOKEN
           </div>
         </div>
         <ul>
-        <li className="dropdown">
+          <li className="dropdown">
             <Link to="/dashboard"><i className="fas fa-users"></i> Dashboard <i className="fas fa-caret-down"></i></Link>
           </li>
           <li className="dropdown">
@@ -46,7 +44,10 @@ const Dashboard = () => {
             </ul>
           </li>
           <li className="dropdown">
-            <Link to="/community"><i className="fas fa-users"></i> Community <i className="fas fa-caret-down"></i></Link>
+            <a href="#"><i className="fas fa-users"></i> Community <i className="fas fa-caret-down"></i></a>
+            <ul className="dropdown-menu">
+              <li><Link to="/community"><i className="fas fa-user-friends"></i> Active Members/Inactive Members</Link></li>
+            </ul>
           </li>
           <li><Link to="/news"><i className="fas fa-newspaper"></i> News</Link></li>
           <li className="dropdown">
@@ -59,7 +60,7 @@ const Dashboard = () => {
             </ul>
           </li>
           <li className="dropdown">
-            <Link to="/Wallet"><i className="fas fa-users"></i> Wallet Address  or <br /> Change Request <i className="fas fa-caret-down"></i></Link>
+            <Link to="/Wallet"><i className="fas fa-users"></i> Wallet Address or Change Request <i className="fas fa-caret-down"></i></Link>
           </li>
           <li className="dropdown">
             <a href="#" onClick={() => handleDropdownClick('fundManagement')}>
@@ -74,10 +75,9 @@ const Dashboard = () => {
         </ul>
       </div>
       <div className="main-content">
-         
-      <header>
+        <header>
           <div className="breadcrumb">
-            <a href="home">Home</a>  <span>Dashboard</span>
+            <a href="home">Home</a> <span>Dashboard</span>
           </div>
         </header>
         <section className="dashboard-cards">
@@ -126,8 +126,6 @@ const Dashboard = () => {
             <p>0.0000</p>
           </Link>
         </section>
-
-
       </div>
     </div>
   );
