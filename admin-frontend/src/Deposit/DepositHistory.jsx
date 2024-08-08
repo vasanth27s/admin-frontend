@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const TodayDeposit = () => {
+const DepositHistory = () => {
+  const [deposits, setDeposits] = useState([]);
+
+  useEffect(() => {
+    fetchDeposits();
+  }, []);
+
+  const fetchDeposits = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/deposits');
+      const data = await response.json();
+      setDeposits(data);
+    } catch (error) {
+      console.error('Error fetching deposits:', error);
+    }
+  };
+
   const styles = {
-    body: {
-      fontFamily: 'Arial, sans-serif',
-      margin: 0,
-      padding: 0,
-      backgroundSize: 'cover',
-      backdropFilter: 'blur(10px)',
-      color: '#fff',
-    },
     container: {
       width: '90%',
       margin: '20px auto',
@@ -18,6 +26,14 @@ const TodayDeposit = () => {
       padding: '20px',
       boxShadow: '0 0 10px rgba(0, 0, 0, 0.5)',
       overflowX: 'auto', // Allows horizontal scrolling if necessary
+    },
+    body: {
+      fontFamily: 'Arial, sans-serif',
+      margin: 0,
+      padding: 0,
+      backgroundSize: 'cover',
+      backdropFilter: 'blur(10px)',
+      color: '#fff',
     },
     h1: {
       textAlign: 'center',
@@ -54,21 +70,6 @@ const TodayDeposit = () => {
     statusRejected: {
       color: '#f44336',
     },
-    button: {
-      padding: '8px 12px',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      color: '#fff',
-      fontSize: '14px',
-      margin: '5px',
-    },
-    approveBtn: {
-      backgroundColor: '#4caf50',
-    },
-    rejectBtn: {
-      backgroundColor: '#f44336',
-    },
     a: {
       color: '#0f9d58',
       textDecoration: 'none',
@@ -86,10 +87,6 @@ const TodayDeposit = () => {
       container: {
         padding: '15px',
       },
-      button: {
-        fontSize: '12px',
-        padding: '6px 10px',
-      },
     },
     '@media (max-width: 480px)': {
       h1: {
@@ -101,16 +98,12 @@ const TodayDeposit = () => {
       container: {
         padding: '10px',
       },
-      button: {
-        fontSize: '10px',
-        padding: '4px 8px',
-      },
     },
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.h1}>Today's Deposits</h1>
+      <h1 style={styles.h1}>Deposit History</h1>
       <table style={styles.table}>
         <thead>
           <tr>
@@ -125,41 +118,22 @@ const TodayDeposit = () => {
           </tr>
         </thead>
         <tbody>
-          <tr style={styles.trOdd}>
-            <td>001</td>
-            <td>2024-07-26</td>
-            <td>user123</td>
-            <td>John Doe</td>
-            <td>$1000</td>
-            <td>0x123456789abcdef</td>
-            <td>0xabcdef123456789</td>
-            <td style={styles.statusProcessing}>Processing</td>
-          </tr>
-          <tr style={styles.trEven}>
-            <td>002</td>
-            <td>2024-07-26</td>
-            <td>user456</td>
-            <td>Jane Smith</td>
-            <td>$500</td>
-            <td>0xabcdef123456789</td>
-            <td>0x123456789abcdef</td>
-            <td style={styles.statusApproved}>Approved</td>
-          </tr>
-          <tr style={styles.trOdd}>
-            <td>003</td>
-            <td>2024-07-26</td>
-            <td>user789</td>
-            <td>Emily Davis</td>
-            <td>$200</td>
-            <td>0x789abcdef123456</td>
-            <td>0x456789abcdef123</td>
-            <td style={styles.statusRejected}>Rejected</td>
-          </tr>
-          {/* Add more rows as needed */}
+          {deposits.map((deposit, index) => (
+            <tr key={deposit.id} style={index % 2 === 0 ? styles.trEven : styles.trOdd}>
+              <td>{index + 1}</td>
+              <td>{deposit.date}</td>
+              <td>{deposit.user_id}</td>
+              <td>{deposit.name}</td>
+              <td>{deposit.amount}</td>
+              <td>{deposit.transaction_hash}</td>
+              <td>{deposit.wallet_address}</td>
+              <td style={styles[`status${deposit.status}`]}>{deposit.status}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
   );
 };
 
-export default TodayDeposit;
+export default DepositHistory;

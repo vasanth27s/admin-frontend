@@ -1,6 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const DepositRequest = () => {
+  const [deposits, setDeposits] = useState([]);
+
+  useEffect(() => {
+    fetchDeposits();
+  }, []);
+
+  const fetchDeposits = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/deposits');
+      const data = await response.json();
+      setDeposits(data);
+    } catch (error) {
+      console.error('Error fetching deposits:', error);
+    }
+  };
+
+  const updateDepositStatus = async (id, status) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/deposits/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (response.ok) {
+        fetchDeposits();
+      } else {
+        console.error('Error updating deposit status');
+      }
+    } catch (error) {
+      console.error('Error updating deposit status:', error);
+    }
+  };
+
   const styles = {
     body: {
       fontFamily: 'Arial, sans-serif',
@@ -111,21 +146,22 @@ const DepositRequest = () => {
           </tr>
         </thead>
         <tbody>
-          <tr style={styles.trOdd}>
-            <td>001</td>
-            <td>2024-07-26</td>
-            <td>user123</td>
-            <td>John Doe</td>
-            <td>$1000</td>
-            <td>USD</td>
-            <td>0x123456789abcdef</td>
-            <td>0xabcdef123456789</td>
-            <td><a href="screenshot.jpg" target="_blank" rel="noopener noreferrer" style={styles.a}>View Screenshot</a></td>
-            <td>Pending</td>
-            <td><button style={{ ...styles.button, ...styles.approveBtn }}>Approve</button></td>
-            <td><button style={{ ...styles.button, ...styles.rejectBtn }}>Reject</button></td>
-          </tr>
-          {/* Add more rows as needed */}
+          {deposits.map((deposit, index) => (
+            <tr key={deposit.id} style={index % 2 === 0 ? styles.trEven : styles.trOdd}>
+              <td>{index + 1}</td>
+              <td>{deposit.date}</td>
+              <td>{deposit.user_id}</td>
+              <td>{deposit.name}</td>
+              <td>{deposit.amount}</td>
+              <td>{deposit.currency}</td>
+              <td>{deposit.transaction_hash}</td>
+              <td>{deposit.wallet_address}</td>
+              <td><a href={deposit.screenshot_url} target="_blank" rel="noopener noreferrer" style={styles.a}>View Screenshot</a></td>
+              <td>{deposit.status}</td>
+              <td><button style={{ ...styles.button, ...styles.approveBtn }} onClick={() => updateDepositStatus(deposit.id, 'Approved')}>Approve</button></td>
+              <td><button style={{ ...styles.button, ...styles.rejectBtn }} onClick={() => updateDepositStatus(deposit.id, 'Rejected')}>Reject</button></td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

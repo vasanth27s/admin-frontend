@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const News = () => {
     const [newsItems, setNewsItems] = useState([]);
@@ -7,18 +7,32 @@ const News = () => {
     const [link, setLink] = useState('');
     const [date, setDate] = useState('');
 
+    useEffect(() => {
+        fetchNews();
+    }, []);
+
+    const fetchNews = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/news');
+            const data = await response.json();
+            setNewsItems(data);
+        } catch (error) {
+            console.error('Error fetching news:', error);
+        }
+    };
+
     const handleImageChange = (e) => {
         setImage(e.target.files[0]);
     };
 
-    const addNews = () => {
+    const addNews = async () => {
         if (!title || !image || !link || !date) {
             alert('Please fill out all fields and choose an image.');
             return;
         }
 
         const reader = new FileReader();
-        reader.onload = function (e) {
+        reader.onload = async function (e) {
             const imgURL = e.target.result;
             const newNews = {
                 title,
@@ -27,19 +41,38 @@ const News = () => {
                 date
             };
 
-            setNewsItems([...newsItems, newNews]);
+            try {
+                const response = await fetch('http://localhost:5000/api/news', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newNews),
+                });
+                const result = await response.json();
+                setNewsItems([...newsItems, result]);
 
-            // Clear the form fields
-            setTitle('');
-            setImage(null);
-            setLink('');
-            setDate('');
+                // Clear the form fields
+                setTitle('');
+                setImage(null);
+                setLink('');
+                setDate('');
+            } catch (error) {
+                console.error('Error adding news:', error);
+            }
         };
         reader.readAsDataURL(image);
     };
 
-    const deleteNews = (index) => {
-        setNewsItems(newsItems.filter((_, i) => i !== index));
+    const deleteNews = async (id, index) => {
+        try {
+            await fetch(`http://localhost:5000/api/news/${id}`, {
+                method: 'DELETE',
+            });
+            setNewsItems(newsItems.filter((_, i) => i !== index));
+        } catch (error) {
+            console.error('Error deleting news:', error);
+        }
     };
 
     const viewNews = (newsItem) => {
@@ -80,7 +113,8 @@ const News = () => {
                     }
 
                     .form-box input[type="text"],
-                    .form-box input[type="file"] {
+                    .form-box input[type="file"],
+                    .form-box input[type="date"] {
                         width: calc(100% - 20px);
                         padding: 10px;
                         margin-bottom: 10px;
@@ -207,7 +241,7 @@ const News = () => {
                                 <td>{newsItem.date}</td>
                                 <td>
                                     <button className="view-btn" onClick={() => viewNews(newsItem)}>View</button>
-                                    <button className="delete-btn" onClick={() => deleteNews(index)}>Delete</button>
+                                    <button className="delete-btn" onClick={() => deleteNews(newsItem.id, index)}>Delete</button>
                                 </td>
                             </tr>
                         ))}

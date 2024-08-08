@@ -77,7 +77,7 @@ const Dashboard = () => {
       <div className="main-content">
         <header>
           <div className="breadcrumb">
-            <a href="home">Home</a> <span>Dashboard</span>
+            <a href="/">Home</a> <span>Dashboard</span>
           </div>
         </header>
         <section className="dashboard-cards">

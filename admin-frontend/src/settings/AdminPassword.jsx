@@ -5,7 +5,7 @@ const AdminPassword = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
 
         if (newPassword !== confirmPassword) {
@@ -13,8 +13,29 @@ const AdminPassword = () => {
             return;
         }
 
-        // Here, you would typically send the form data to the server for processing.
-        alert('Password change request submitted.');
+        try {
+            const response = await fetch('http://localhost:5000/api/users/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: 1, // Assuming the user ID is 1 for this example
+                    oldPassword,
+                    newPassword,
+                }),
+            });
+
+            if (response.ok) {
+                alert('Password change request submitted.');
+            } else {
+                const errorText = await response.text();
+                alert(`Error: ${errorText}`);
+            }
+        } catch (error) {
+            console.error('Error changing password:', error);
+            alert('An error occurred. Please try again.');
+        }
     };
 
     return (
