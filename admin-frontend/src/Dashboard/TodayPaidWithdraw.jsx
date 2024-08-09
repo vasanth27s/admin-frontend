@@ -8,39 +8,67 @@ import 'datatables.net-responsive';
 
 const TodayPaidWithdraw = () => {
     useEffect(() => {
-        const data = [
-            { sno: 1, select: '', memberId: 'FCTC00001', customerName: 'John Doe', withdrawAmount: '₹1000.00', punchTimes: '2024-07-29 10:00 AM', status: 'Pending', usdt: '0.00', fctc: '0.00' },
-            { sno: 2, select: '', memberId: 'FCTC00002', customerName: 'Jane Doe', withdrawAmount: '₹2000.00', punchTimes: '2024-07-29 11:00 AM', status: 'Pending', usdt: '0.00', fctc: '0.00' },
-            // Add more data as needed
-        ];
+        const fetchWithdrawals = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/withdrawals/today');
+                const data = await response.json();
 
-        const table = $('#withdraw-history').DataTable({
-            data: data,
-            columns: [
-                { data: 'sno' },
-                { data: 'select', render: () => '<input type="checkbox">' },
-                { data: 'memberId' },
-                { data: 'customerName' },
-                { data: 'withdrawAmount' },
-                { data: 'punchTimes' },
-                { data: 'status' },
-                { data: 'usdt' },
-                { data: 'fctc' },
-            ],
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ],
-            responsive: true,
-            destroy: true, // Add this line to destroy the previous DataTable instance
-        });
+                $('#withdraw-history').DataTable({
+                    data: data,
+                    columns: [
+                        { data: 'id', title: 'S.No' },
+                        { data: 'select', render: () => '<input type="checkbox">' },
+                        { data: 'memberId', title: 'Member Id' },
+                        { data: 'customerName', title: 'Customer Name' },
+                        { data: 'withdrawAmount', title: 'Withdraw Amount' },
+                        { data: 'punchTimes', title: 'Punch Times' },
+                        { data: 'status', title: 'Status' },
+                        { data: 'usdt', title: 'USDT' },
+                        { data: 'fctc', title: 'FCTC' },
+                    ],
+                    dom: 'Bfrtip',
+                    buttons: [
+                        'copy', 'csv', 'excel', 'pdf', 'print'
+                    ],
+                    responsive: true,
+                    destroy: true, // Add this line to destroy the previous DataTable instance
+                });
 
-        $('#transfer-to-paid').click(() => {
-            alert('Transfer to Paid button clicked');
+            } catch (error) {
+                console.error('Error fetching withdrawals:', error);
+            }
+        };
+
+        fetchWithdrawals();
+
+        $('#transfer-to-paid').click(async () => {
+            const selectedIds = [];
+            $('#withdraw-history tbody input[type="checkbox"]:checked').each(function() {
+                const row = $(this).closest('tr');
+                const data = $('#withdraw-history').DataTable().row(row).data();
+                selectedIds.push(data.id);
+            });
+
+            try {
+                for (const id of selectedIds) {
+                    await fetch('http://localhost:5000/api/withdrawals/status', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ id, status: 'Paid' }),
+                    });
+                }
+                alert('Selected withdrawals have been marked as Paid.');
+                fetchWithdrawals(); // Refresh the data
+            } catch (error) {
+                console.error('Error updating withdrawal status:', error);
+            }
         });
 
         // Cleanup function to destroy the DataTable instance on component unmount
         return () => {
+            const table = $('#withdraw-history').DataTable();
             if (table) {
                 table.destroy();
             }
@@ -101,6 +129,13 @@ const styles = {
     },
     button: {
         marginTop: '20px',
+        padding: '10px 20px',
+        fontSize: '16px',
+        backgroundColor: '#28a745',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
     },
 };
 

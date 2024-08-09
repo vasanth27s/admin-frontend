@@ -3,41 +3,41 @@ import React, { useEffect, useState } from 'react';
 const TodayUnpaidWithdraw = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
   const rowsPerPage = 15;
 
   useEffect(() => {
-    // Sample data for demonstration
-    const fetchData = [
-      { id: 'FCTC00001', name: 'John Doe', fundValue: '0.00', reason: 'Withdrawal', time: '2024-07-29 10:00 AM', status: 'Pending' },
-      { id: 'FCTC00002', name: 'Jane Doe', fundValue: '0.00', reason: 'Withdrawal', time: '2024-07-29 11:00 AM', status: 'Pending' },
-      // Add more data here
-    ];
-    setData(fetchData);
-  }, []);
+    fetchWithdrawals();
+  }, [currentPage]);
+
+  const fetchWithdrawals = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/withdrawals/unpaid?page=${currentPage}&rowsPerPage=${rowsPerPage}`);
+      const result = await response.json();
+      setData(result.data);
+      setTotalRows(result.totalRows);
+    } catch (error) {
+      console.error('Error fetching withdrawals:', error);
+    }
+  };
 
   const displayTable = () => {
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = currentPage * rowsPerPage;
-    const paginatedData = data.slice(start, end);
-
-    return paginatedData.map((row, index) => (
+    return data.map((row, index) => (
       <tr key={row.id}>
-        <td>{start + index + 1}</td>
+        <td>{(currentPage - 1) * rowsPerPage + index + 1}</td>
         <td><input type="checkbox" /></td>
-        <td>{row.id}</td>
-        <td>{row.name}</td>
-        <td>{row.fundValue}</td>
+        <td>{row.memberId}</td>
+        <td>{row.customerName}</td>
+        <td>{row.withdrawAmount}</td>
         <td>{row.reason}</td>
         <td>{row.time}</td>
         <td>{row.status}</td>
-        <td>USDT</td>
-        <td>FCTC</td>
       </tr>
     ));
   };
 
   const updatePagination = () => {
-    const totalPages = Math.ceil(data.length / rowsPerPage);
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
     const isFirstPage = currentPage === 1;
     const isLastPage = currentPage === totalPages;
 
@@ -77,10 +77,9 @@ const TodayUnpaidWithdraw = () => {
             <th>Member Id</th>
             <th>Customer Name</th>
             <th>Withdrawal Amount</th>
+            <th>Reason</th>
             <th>Punch Times</th>
             <th>Status</th>
-            <th>USDT</th>
-            <th>FCTC</th>
           </tr>
         </thead>
         <tbody>
@@ -92,7 +91,6 @@ const TodayUnpaidWithdraw = () => {
   );
 };
 
-// Inline styles for the component
 const styles = {
   container: {
     display: 'flex',

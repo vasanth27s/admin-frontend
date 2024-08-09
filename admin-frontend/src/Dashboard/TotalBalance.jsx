@@ -4,8 +4,18 @@ const TotalBalance = () => {
     const [balance, setBalance] = useState('0.00');
 
     useEffect(() => {
-        // Replace the content below with dynamic data fetch or calculation
-        setBalance('$50,000.00');
+        const fetchBalance = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/balance');
+                const result = await response.json();
+                setBalance(`$${result.balance}`);
+            } catch (error) {
+                console.error('Error fetching balance:', error);
+                setBalance('$0.00');
+            }
+        };
+
+        fetchBalance();
     }, []);
 
     return (

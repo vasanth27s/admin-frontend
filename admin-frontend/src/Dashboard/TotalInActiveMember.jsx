@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
 
 const TotalInActiveMember = () => {
-    const [data] = useState([
-        {id: 'FCTC00001', name: 'FCTCTOKEN', referralId: 'FCTC00001', main: '0.00', withdrawal: '0.00', activate: '0'},
-        {id: 'FCTC1804271', name: 'FCTC00002', referralId: 'FCTC00001', main: '0.00', withdrawal: '0.00', activate: '0'},
-        // Add more data here
-    ]);
+    const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 15;
     const totalPages = Math.ceil(data.length / rowsPerPage);
+
+    useEffect(() => {
+        const fetchInactiveMembers = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/inactive-members');
+                const result = await response.json();
+                setData(result.members);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchInactiveMembers();
+    }, []);
 
     const displayTable = (page) => {
         const start = (page - 1) * rowsPerPage;
@@ -55,7 +65,7 @@ const TotalInActiveMember = () => {
                             <td>{row.referralId}</td>
                             <td>{row.main}</td>
                             <td>{row.withdrawal}</td>
-                            <td><input type="text" value={row.activate} /><button>Activate</button></td>
+                            <td><input type="text" value={row.activate} readOnly /><button>Activate</button></td>
                         </tr>
                     ))}
                 </tbody>

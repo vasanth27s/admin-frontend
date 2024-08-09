@@ -1,6 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Request = () => {
+    const [pendingWithdrawals, setPendingWithdrawals] = useState([]);
+
+    useEffect(() => {
+        fetch('http://localhost:5000/api/withdrawals')
+            .then((response) => response.json())
+            .then((data) => setPendingWithdrawals(data.filter(w => w.status === 'Pending')))
+            .catch((error) => console.error('Error fetching withdrawals:', error));
+    }, []);
+
+    const handleApprove = (id) => {
+        updateWithdrawalStatus(id, 'Approved');
+    };
+
+    const handleReject = (id) => {
+        updateWithdrawalStatus(id, 'Rejected');
+    };
+
+    const updateWithdrawalStatus = (id, status) => {
+        fetch('http://localhost:5000/api/withdrawals/status', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id, status }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                alert(data.message);
+                setPendingWithdrawals(pendingWithdrawals.filter(w => w.id !== id));
+            })
+            .catch((error) => console.error('Error updating withdrawal status:', error));
+    };
+
     return (
         <div>
             <style>
@@ -102,37 +135,26 @@ const Request = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>001</td>
-                            <td>member123</td>
-                            <td>John Doe</td>
-                            <td>$500</td>
-                            <td>0x123456789abcdef</td>
-                            <td className="status-pending">Pending</td>
-                            <td><button className="approve-btn">Approve</button></td>
-                            <td><button className="reject-btn">Reject</button></td>
-                        </tr>
-                        <tr>
-                            <td>002</td>
-                            <td>member456</td>
-                            <td>Jane Smith</td>
-                            <td>$1000</td>
-                            <td>0xabcdef123456789</td>
-                            <td className="status-approved">Approved</td>
-                            <td><button className="approve-btn" disabled>Approve</button></td>
-                            <td><button className="reject-btn" disabled>Reject</button></td>
-                        </tr>
-                        <tr>
-                            <td>003</td>
-                            <td>member789</td>
-                            <td>Emily Davis</td>
-                            <td>$200</td>
-                            <td>0x789abcdef123456</td>
-                            <td className="status-rejected">Rejected</td>
-                            <td><button className="approve-btn" disabled>Approve</button></td>
-                            <td><button className="reject-btn" disabled>Reject</button></td>
-                        </tr>
-                        {/* Add more rows as needed */}
+                        {pendingWithdrawals.map((withdrawal, index) => (
+                            <tr key={withdrawal.id}>
+                                <td>{index + 1}</td>
+                                <td>{withdrawal.memberId}</td>
+                                <td>{withdrawal.customerName}</td>
+                                <td>${withdrawal.withdrawAmount}</td>
+                                <td>{withdrawal.walletAddress}</td>
+                                <td className="status-pending">Pending</td>
+                                <td>
+                                    <button className="approve-btn" onClick={() => handleApprove(withdrawal.id)}>
+                                        Approve
+                                    </button>
+                                </td>
+                                <td>
+                                    <button className="reject-btn" onClick={() => handleReject(withdrawal.id)}>
+                                        Reject
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>

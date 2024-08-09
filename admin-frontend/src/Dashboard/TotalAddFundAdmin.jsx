@@ -1,4 +1,3 @@
-// TotalAddFundAdmin.jsx
 import React, { useState, useEffect } from 'react';
 
 const TotalAddFundAdmin = () => {
@@ -9,17 +8,19 @@ const TotalAddFundAdmin = () => {
     const rowsPerPage = 10;
 
     useEffect(() => {
-        // Mock data for demonstration purposes
-        const fetchData = () => {
-            const mockData = [
-                { senderId: 'FCTC00001', sendToId: 'FCTC2406508', sendToName: 'MUSTHAFA', ngmValue: '50000.00', date: '2024-07-29 13:12:28', status: 'Admin To User coinwallet' },
-                // Add more data here
-            ];
-            setData(mockData);
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`/api/addfunds?search=${encodeURIComponent(searchTerm)}`);
+                const result = await response.json();
+                setData(result);
+                setFilteredData(result);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         };
 
         fetchData();
-    }, []);
+    }, [searchTerm]);
 
     useEffect(() => {
         filterData();

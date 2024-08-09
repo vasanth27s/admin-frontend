@@ -1,49 +1,48 @@
-// TotalActiveMembers.jsx
 import React, { useState, useEffect } from 'react';
 
 const TotalActiveMembers = () => {
-    const [users, setUsers] = useState([]);
+    const [members, setMembers] = useState([]);
     const [totalMembers, setTotalMembers] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState('');
     const rowsPerPage = 10;
 
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchMembers = async () => {
             try {
-                const response = await fetch(`/api/users?search=${encodeURIComponent(searchValue)}`);
+                const response = await fetch(`/api/members?search=${encodeURIComponent(searchValue)}`);
                 const data = await response.json();
-                setUsers(data.users);
-                setTotalMembers(data.users.length);
+                setMembers(data.members);
+                setTotalMembers(data.members.length);
             } catch (error) {
-                console.error('Error fetching users:', error);
-                setUsers([]);
+                console.error('Error fetching members:', error);
+                setMembers([]);
             }
         };
 
-        fetchUsers();
+        fetchMembers();
     }, [searchValue]);
 
     useEffect(() => {
         displayPage(currentPage);
-    }, [currentPage, users]);
+    }, [currentPage, members]);
 
     const displayPage = (page) => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
-        const paginatedUsers = users.slice(start, end);
+        const paginatedMembers = members.slice(start, end);
 
-        return paginatedUsers.map((user, index) => (
-            <tr key={user.id}>
+        return paginatedMembers.map((member, index) => (
+            <tr key={member.id}>
                 <td>{start + index + 1}</td>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
-                <td>{user.referralId}</td>
-                <td>{user.main}</td>
-                <td>{user.withdrawal}</td>
+                <td>{member.id}</td>
+                <td>{member.name}</td>
+                <td>{member.referralId}</td>
+                <td>{member.main}</td>
+                <td>{member.withdrawal}</td>
                 <td>
-                    <button className="edit-btn" onClick={() => editUser(user.id)}>Edit</button>
-                    <button className="login-btn" onClick={() => loginUser(user.id)}>Login</button>
+                    <button className="edit-btn" onClick={() => editMember(member.id)}>Edit</button>
+                    <button className="login-btn" onClick={() => loginMember(member.id)}>Login</button>
                 </td>
             </tr>
         ));
@@ -78,29 +77,29 @@ const TotalActiveMembers = () => {
         return buttons;
     };
 
-    const searchUsers = async () => {
+    const searchMembers = async () => {
         setCurrentPage(1);
-        const fetchUsers = async () => {
+        const fetchMembers = async () => {
             try {
-                const response = await fetch(`/api/users?search=${encodeURIComponent(searchValue)}`);
+                const response = await fetch(`/api/members?search=${encodeURIComponent(searchValue)}`);
                 const data = await response.json();
-                setUsers(data.users);
-                setTotalMembers(data.users.length);
+                setMembers(data.members);
+                setTotalMembers(data.members.length);
             } catch (error) {
-                console.error('Error fetching users:', error);
-                setUsers([]);
+                console.error('Error fetching members:', error);
+                setMembers([]);
             }
         };
 
-        fetchUsers();
+        fetchMembers();
     };
 
-    const editUser = (userId) => {
-        console.log(`Edit user with ID: ${userId}`);
+    const editMember = (memberId) => {
+        console.log(`Edit member with ID: ${memberId}`);
     };
 
-    const loginUser = (userId) => {
-        console.log(`Login as user with ID: ${userId}`);
+    const loginMember = (memberId) => {
+        console.log(`Login as member with ID: ${memberId}`);
     };
 
     return (
@@ -117,7 +116,7 @@ const TotalActiveMembers = () => {
                     onChange={(e) => setSearchValue(e.target.value)}
                     style={styles.searchInput}
                 />
-                <button onClick={searchUsers} style={styles.searchButton}>Search</button>
+                <button onClick={searchMembers} style={styles.searchButton}>Search</button>
             </div>
             <div style={styles.tableContainer}>
                 <table style={styles.table}>
@@ -138,7 +137,7 @@ const TotalActiveMembers = () => {
                 </table>
             </div>
             <div style={styles.pagination}>
-                {setupPagination(users.length, rowsPerPage, currentPage)}
+                {setupPagination(members.length, rowsPerPage, currentPage)}
             </div>
         </div>
     );

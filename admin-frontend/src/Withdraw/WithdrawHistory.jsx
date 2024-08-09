@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const WithdrawalHistory = () => {
+    const [withdrawalHistory, setWithdrawalHistory] = useState([]);
+
+    useEffect(() => {
+        fetch('http://localhost:5000/api/withdrawals')
+            .then((response) => response.json())
+            .then((data) => setWithdrawalHistory(data))
+            .catch((error) => console.error('Error fetching withdrawal history:', error));
+    }, []);
+
     return (
         <div>
             <style>
@@ -66,24 +75,6 @@ const WithdrawalHistory = () => {
                     color: #f44336;
                 }
 
-                button {
-                    padding: 8px 12px;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    color: #fff;
-                    font-size: 14px;
-                    margin: 2px;
-                }
-
-                .approve-btn {
-                    background-color: #4CAF50;
-                }
-
-                .reject-btn {
-                    background-color: #f44336;
-                }
-
                 .reason {
                     color: #f44336;
                 }
@@ -101,46 +92,21 @@ const WithdrawalHistory = () => {
                             <th>Withdrawal Amount</th>
                             <th>Receiving Wallet Address</th>
                             <th>Status</th>
-                            <th>Action (Approve)</th>
-                            <th>Action (Reject)</th>
                             <th>Reason</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>001</td>
-                            <td>member123</td>
-                            <td>John Doe</td>
-                            <td>$500</td>
-                            <td>0x123456789abcdef</td>
-                            <td className="status-processing">Processing</td>
-                            <td><button className="approve-btn">Approve</button></td>
-                            <td><button className="reject-btn">Reject</button></td>
-                            <td className="reason">Pending approval</td>
-                        </tr>
-                        <tr>
-                            <td>002</td>
-                            <td>member456</td>
-                            <td>Jane Smith</td>
-                            <td>$1000</td>
-                            <td>0xabcdef123456789</td>
-                            <td className="status-approved">Approved</td>
-                            <td><button className="approve-btn" disabled>Approve</button></td>
-                            <td><button className="reject-btn" disabled>Reject</button></td>
-                            <td className="reason">N/A</td>
-                        </tr>
-                        <tr>
-                            <td>003</td>
-                            <td>member789</td>
-                            <td>Emily Davis</td>
-                            <td>$200</td>
-                            <td>0x789abcdef123456</td>
-                            <td className="status-rejected">Rejected</td>
-                            <td><button className="approve-btn" disabled>Approve</button></td>
-                            <td><button className="reject-btn" disabled>Reject</button></td>
-                            <td className="reason">Invalid wallet address</td>
-                        </tr>
-                        {/* Add more rows as needed */}
+                        {withdrawalHistory.map((withdrawal, index) => (
+                            <tr key={withdrawal.id}>
+                                <td>{index + 1}</td>
+                                <td>{withdrawal.memberId}</td>
+                                <td>{withdrawal.customerName}</td>
+                                <td>${withdrawal.withdrawAmount}</td>
+                                <td>{withdrawal.walletAddress}</td>
+                                <td className={`status-${withdrawal.status.toLowerCase()}`}>{withdrawal.status}</td>
+                                <td className="reason">{withdrawal.reason}</td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>

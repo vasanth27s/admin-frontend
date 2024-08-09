@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
 
 const TotalWithdraw = () => {
-    const [data, setData] = useState([
-        { senderId: 'FCTC00001', sendToId: 'FCTC2406508', sendToName: 'MUSTHAFA', ngmValue: '50000.00', date: '2024-07-29 13:12:28', status: 'Admin To User coinwallet' }
-    ]);
+    const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const rowsPerPage = 10;
 
+    useEffect(() => {
+        fetch('http://localhost:5000/api/withdrawals')
+            .then(response => response.json())
+            .then(data => setData(data))
+            .catch(error => console.error('Error fetching data:', error));
+    }, []);
+
     const handleSearch = () => {
+        fetch('http://localhost:5000/api/withdrawals/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ search: searchTerm })
+        })
+            .then(response => response.json())
+            .then(data => setData(data))
+            .catch(error => console.error('Error searching data:', error));
         setCurrentPage(1);
     };
 

@@ -7,15 +7,18 @@ const TodayAddFundAdmin = () => {
     const rowsPerPage = 10;
 
     useEffect(() => {
-        // Replace with your data fetch logic
-        const today = new Date().toISOString().split('T')[0];
-        const fetchedData = [
-            {senderId: 'FCTC00001', sendToId: 'FCTC2406508', sendToName: 'MUSTHAFA', ngmValue: '50000.00', date: '2024-07-29 13:12:28', status: 'Admin To User coinwallet'},
-            // Add more data here
-        ].filter(item => item.date.startsWith(today));
-        
-        setData(fetchedData);
+        fetchFunds();
     }, []);
+
+    const fetchFunds = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/funds/today');
+            const fetchedData = await response.json();
+            setData(fetchedData);
+        } catch (error) {
+            console.error('Error fetching funds:', error);
+        }
+    };
 
     const displayTable = (page, searchTerm = '') => {
         const tableBody = document.querySelector('#data-table tbody');
@@ -91,10 +94,10 @@ const TodayAddFundAdmin = () => {
                 </tbody>
             </table>
             <ul className="pagination" id="pagination" style={styles.pagination}>
-                <li><a href="#" id="first-page" style={styles.paginationLink}>First</a></li>
-                <li><a href="#" id="previous-page" style={styles.paginationLink}>Previous</a></li>
-                <li><a href="#" id="next-page" style={styles.paginationLink}>Next</a></li>
-                <li><a href="#" id="last-page" style={styles.paginationLink}>Last</a></li>
+                <li><a href="#" id="first-page" style={styles.paginationLink} onClick={() => setCurrentPage(1)}>First</a></li>
+                <li><a href="#" id="previous-page" style={styles.paginationLink} onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>Previous</a></li>
+                <li><a href="#" id="next-page" style={styles.paginationLink} onClick={() => setCurrentPage(prev => prev + 1)}>Next</a></li>
+                <li><a href="#" id="last-page" style={styles.paginationLink} onClick={() => setCurrentPage(Math.ceil(data.length / rowsPerPage))}>Last</a></li>
             </ul>
         </div>
     );

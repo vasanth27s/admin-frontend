@@ -1,52 +1,43 @@
 import React, { useState, useEffect } from 'react';
 
 const TotalWithdrawFund = () => {
-    const [data, setData] = useState([
-        { id: 'FCTC00001', name: 'FCTCTOKEN', fundValue: '0.00', reason: 'Withdrawal', time: '2024-07-29 10:00 AM', status: 'Pending' },
-        { id: 'FCTC1804271', name: 'FCTC00002', fundValue: '0.00', reason: 'Withdrawal', time: '2024-07-29 11:00 AM', status: 'Pending' }
-        // Add more data here
-    ]);
+    const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 15;
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        displayTable(currentPage, searchTerm);
+        fetchData();
     }, [currentPage, searchTerm]);
 
-    const displayTable = (page, searchTerm) => {
-        const tableBody = document.querySelector('#data-table tbody');
-        tableBody.innerHTML = '';
+    const fetchData = () => {
+        const url = searchTerm ? 'http://localhost:5000/api/withdraw-funds/search' : 'http://localhost:5000/api/withdraw-funds';
+        const method = searchTerm ? 'POST' : 'GET';
+        const body = searchTerm ? JSON.stringify({ search: searchTerm }) : null;
 
-        const filteredData = data.filter(item =>
-            item.id.includes(searchTerm) ||
-            item.name.includes(searchTerm) ||
-            item.fundValue.includes(searchTerm) ||
-            item.reason.includes(searchTerm) ||
-            item.time.includes(searchTerm) ||
-            item.status.includes(searchTerm)
-        );
-
-        const start = (page - 1) * rowsPerPage;
-        const end = page * rowsPerPage;
-        const paginatedData = filteredData.slice(start, end);
-
-        paginatedData.forEach((row, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${start + index + 1}</td>
-                <td>${row.id}</td>
-                <td>${row.name}</td>
-                <td>${row.fundValue}</td>
-                <td>${row.reason}</td>
-                <td>${row.time}</td>
-                <td>${row.status}</td>
-            `;
-            tableBody.appendChild(tr);
-        });
-
-        updatePagination(filteredData.length);
+        fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body
+        })
+        .then(response => response.json())
+        .then(data => setData(data))
+        .catch(error => console.error('Error fetching data:', error));
     };
+
+    const handleSearch = () => {
+        setCurrentPage(1);
+        fetchData();
+    };
+
+    const handleKeyUp = (event) => {
+        if (event.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
+    const paginatedData = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const totalPages = Math.ceil(data.length / rowsPerPage);
 
     const updatePagination = (totalRows) => {
         const totalPages = Math.ceil(totalRows / rowsPerPage);
@@ -56,46 +47,35 @@ const TotalWithdrawFund = () => {
         document.getElementById('last-page').classList.toggle('disabled', currentPage === totalPages);
     };
 
-    const handleSearch = () => {
-        setSearchTerm(document.getElementById('search-input').value);
-        setCurrentPage(1);
-    };
-
-    const handleKeyUp = (event) => {
-        if (event.key === 'Enter') {
-            handleSearch();
-        }
-    };
+    useEffect(() => {
+        updatePagination(data.length);
+    }, [data.length]);
 
     return (
-        <div
-            style={{
-                fontFamily: 'Arial, sans-serif',
-                backgroundImage: 'url("web eg - 02.jpg")',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                color: 'white',
-                margin: 0,
-                padding: 0,
-                maxWidth: '1200px',
-                margin: '0 auto',
+        <div style={{
+            fontFamily: 'Arial, sans-serif',
+            backgroundImage: 'url("web eg - 02.jpg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            color: 'white',
+            margin: 0,
+            padding: 0,
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '20px',
+        }}>
+            <div style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '10px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                marginBottom: '20px',
                 padding: '20px',
-            }}
-        >
-            <div
-                style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    borderRadius: '10px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-                    marginBottom: '20px',
-                    padding: '20px',
-                }}
-            >
+            }}>
                 <h3 style={{ margin: 0, fontSize: '1.5em' }}>Total Withdrawal Fund</h3>
                 <p id="total-withdrawal-fund" style={{ fontSize: '2em', margin: '10px 0 0' }}>$10,000.00</p>
             </div>
@@ -150,7 +130,17 @@ const TotalWithdrawFund = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {/* Data will be inserted here by JavaScript */}
+                    {paginatedData.map((row, index) => (
+                        <tr key={index}>
+                            <td style={{ padding: '10px' }}>{(currentPage - 1) * rowsPerPage + index + 1}</td>
+                            <td style={{ padding: '10px' }}>{row.id}</td>
+                            <td style={{ padding: '10px' }}>{row.name}</td>
+                            <td style={{ padding: '10px' }}>{row.fundValue}</td>
+                            <td style={{ padding: '10px' }}>{row.reason}</td>
+                            <td style={{ padding: '10px' }}>{row.time}</td>
+                            <td style={{ padding: '10px' }}>{row.status}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
             <ul
@@ -168,6 +158,7 @@ const TotalWithdrawFund = () => {
                     <a
                         href="#"
                         id="first-page"
+                        onClick={() => setCurrentPage(1)}
                         style={{
                             padding: '10px 15px',
                             backgroundColor: '#f1f1f1',
@@ -183,6 +174,7 @@ const TotalWithdrawFund = () => {
                     <a
                         href="#"
                         id="previous-page"
+                        onClick={() => setCurrentPage(currentPage - 1)}
                         style={{
                             padding: '10px 15px',
                             backgroundColor: '#f1f1f1',
@@ -198,6 +190,7 @@ const TotalWithdrawFund = () => {
                     <a
                         href="#"
                         id="next-page"
+                        onClick={() => setCurrentPage(currentPage + 1)}
                         style={{
                             padding: '10px 15px',
                             backgroundColor: '#f1f1f1',
@@ -213,6 +206,7 @@ const TotalWithdrawFund = () => {
                     <a
                         href="#"
                         id="last-page"
+                        onClick={() => setCurrentPage(totalPages)}
                         style={{
                             padding: '10px 15px',
                             backgroundColor: '#f1f1f1',
